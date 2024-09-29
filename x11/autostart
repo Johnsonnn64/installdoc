@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# cat ~/.cache/brightness | sudo tee /sys/class/backlight/*/brightness &
+picom -b &
+
+# for pipewire
+pipewire &
+wireplumber &
+# equalizer for pipewire
+easyeffects --gapplication-service &
+
+# for pulseaudio
+# pulseaudio --start --log-target=syslog &
+fcitx5 &
+clipmenud  &
+dunst &
+unclutter --start-hidden --timeout 2 -f &
+xrdb merge ~/.config/x11/Xresources_catppuccin &
+# monitor -r &
+feh --bg-fill --no-fehbg ~/personal/pictures/wall.png &
+
+# run bar script and dwm ( do not remove this )
+~/workspace/suckless/jondwm/bar/bar.sh &
+dwm

@@ -1,0 +1,5 @@
+xinput set-prop "SynPS/2 Synaptics TouchPad" "libinput Tapping Enabled" 1
+xinput set-prop "TPPS/2 Elan TrackPoint" "libinput Accel Speed" -0.696969
+xinput set-prop "TPPS/2 Elan TrackPoint" "libinput Accel Profile Available" 1, 1
+
+exec ~/.config/x11/autostart
