@@ -141,3 +141,19 @@ sudo pacman -S keyd
 sudo ln -vsf default.conf /etc/keyd/
 ```
 
+## Scripts
+some shell scripts
+```bash
+ln -vsf $PWD/bin/ $HOME/.local/
+```
+
+## MISC
+[] nsxiv
+[] mpv
+[] btop
+[] catppuccin (grub, gtk, cursor, ytm, discord, etc)
+[] git
+[] zathura
+[] nvim
+[] lf
+[] driver (screen tear)
