@@ -103,6 +103,41 @@ used to use st (https://github.com/johnsonnn64/st) but changed to alacritty due 
 ``` bash
 sudo pacman -s alacritty
 ln -vsf alacritty.toml ~/.config/
+
+## Shell
+using zsh as my default shell with starship for eyecandy
+- install zsh and starship
+```bash
+sudo pacman -S zsh starship
+ln -vsf $PWD/zsh/ $HOME/.config/
+ln -vsf $PWD/starship.toml $HOME/.config/
+```
+
+- add plugins
+```bash
+mkdir ~/.config/zsh/zplugins/
+cd ~/.config/zsh/zplugins/
+git clone https://github.com/zsh-users/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting
+```
+
+- change zsh dot directory 
+```bash
+echo "export ZDOTDIR='$HOME/.config/zsh/'" | sudo tee /etc/zsh/zshenv
+echo "emulate sh -c 'source /etc/profile' \nsource '$HOME/.config/zsh/.zprofile'" | sudo tee /etc/zsh/zprofile
+
+```
+
+- change shell to zsh for all users
+```bash
+sudo chsh -s /bin/zsh **users**
+```
+- change sh from bash to dash (optional)
+```bash
+sudo pacman -S dash
+sudo ln -sfT /bin/dash /bin/sh
+echo "[Trigger] \nType = Package \nOperation = Install \nOperation = Upgrade \nTarget = bash \n\n[Action] \nDescription = Re-pointing /bin/sh symlink to dash... \nWhen = PostTransaction \nExec = /usr/bin/ln -sfT dash /usr/bin/sh \nDepends = dash" | sudo tee /usr/share/libalpm/hooks/bash-update.hook
+
 ```
 
 ## Audio
