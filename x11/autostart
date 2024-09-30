@@ -1,16 +1,17 @@
 #!/bin/sh
 
-# cat ~/.cache/brightness | sudo tee /sys/class/backlight/*/brightness &
-picom -b &
+# picom -b &
 
 # for pipewire
 pipewire &
+pipewire-pulse &
 wireplumber &
 # equalizer for pipewire
 easyeffects --gapplication-service &
 
 # for pulseaudio
 # pulseaudio --start --log-target=syslog &
+monitor -r &
 fcitx5 &
 clipmenud  &
 dunst &
