@@ -132,3 +132,12 @@ mkdir -p ~/.local/share/fcitx5/themes/ # catppuccin theme for fctix5
 cd fcitx5/
 cp -r src/* ~/.local/share/fcitx5/themes/
 ```
+
+## Keyboard Remap
+using keyd to remap caps-esc and more
+- install keyd
+```bash
+sudo pacman -S keyd
+sudo ln -vsf default.conf /etc/keyd/
+```
+
