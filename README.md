@@ -155,6 +155,13 @@ using a fork of picom
 yay -S picom-ftlabs-git
 ln -vsf $PWD/picom.conf $HOME/.config/picom/
 ```
+---
+**_NOTE_**
+
+Using picom puts GPU on load especially with experimental backends and blur options, causing coil whine (scratching noise from GPU)
+Will update when fix is found
+
+---
 
 ## Input Method Framework
 using fcitx5 
