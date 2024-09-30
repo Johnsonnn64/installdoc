@@ -72,8 +72,8 @@ sudo pacman -S xdotool xdotool xf86-input-libinput xf86-video-amdgpu xf86-video-
 ```
 - link Xorg configs
 ```bash
-ln -vsf x11/ ~/.config/
-sudo ln -vsf xserverrc /etc/X11/xinit # keyboard repeat delay setting
+ln -vsf $PWD/x11/ $HOME/.config/
+sudo ln -vsf $PWD/xserverrc /etc/X11/xinit # keyboard repeat delay setting
 ```
 
 ## Window Manager
@@ -101,8 +101,9 @@ sudo make clean install
 used to use st (https://github.com/johnsonnn64/st) but changed to alacritty due to font problems
 - install alacritty
 ``` bash
-sudo pacman -s alacritty
-ln -vsf alacritty.toml ~/.config/
+sudo pacman -S alacritty
+ln -vsf $PWD/alacritty.toml $HOME/.config/
+```
 
 ## Shell
 using zsh as my default shell with starship for eyecandy
@@ -152,7 +153,7 @@ using a fork of picom
 - install picom-ftlabs-git
 ```bash
 yay -S picom-ftlabs-git
-ln -vsf picom.conf ~/.config/picom/
+ln -vsf $PWD/picom.conf $HOME/.config/picom/
 ```
 
 ## Input Method Framework
@@ -161,7 +162,7 @@ using fcitx5
 
 ```bash
 sudo pacman -S fcitx5-im fcitx5-hangul fcitx5-mozc
-ln -vsf fcitx5/ ~/.config/
+ln -vsf $PWD/fcitx5/ $HOME/.config/
 git clone https://github.com/catppuccin/fcitx5.git
 mkdir -p ~/.local/share/fcitx5/themes/ # catppuccin theme for fctix5
 cd fcitx5/
