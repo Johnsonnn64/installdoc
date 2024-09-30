@@ -1,0 +1,9 @@
+#!/bin/sh
+
+args="$@"
+
+if [ "$args" = "-r" ]; then
+  cat ~/.cache/xrandr | xargs xrandr
+else
+  xrandr $args & echo "$args" > ~/.cache/xrandr
+fi

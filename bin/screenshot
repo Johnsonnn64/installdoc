@@ -1,0 +1,3 @@
+#!/bin/sh
+
+scrot -F screenshot.png -o -s -f -e "mv screenshot.png ~/personal/pictures/" && xclip -selection clipboard -target image/png -i ~/personal/pictures/screenshot.png

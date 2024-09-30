@@ -1,0 +1,5 @@
+#!/bin/sh
+
+rm *.orig *.rej || true
+sudo make clean install 
+

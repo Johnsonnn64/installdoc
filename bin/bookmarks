@@ -1,0 +1,42 @@
+#!/bin/sh
+
+bookmark="$(xclip -o)"
+file="$HOME/.local/share/bookmarks"
+
+# add() { \
+#   if $(grep -q "$bookmark" $file); then
+#     exit 1
+#   else
+#     name=$(echo "cancel" | dmenu -p "Bookmark name of \"$bookmark\": ") || exit 1
+#     if [ $name = "cancel" ]; then 
+#       exit 1 
+#     fi
+#     echo "$bookmark $name" >> $file 
+#     notify-send "Bookmarks" "$bookmark added to your bookmarks"
+#   fi
+# }
+
+# del() { \
+#   del=$(tac $file | dmenu -p "Select a bookmark to delete: " "$@" -i -l 7) || exit 1
+#   del=$(echo $del | cut -d ' ' -f 1)
+#   escdel=$(echo "$del" | sed -E 's/(\/)|(\.)|(\:)/\\&/g')
+#   sed -i "/$escdel/d" $file
+#   notify-send "Bookmarks" "$del deleted from your bookmarks"
+# }
+
+get() { \
+  sel=$( (cat $file && echo "edit") | dmenu -p "Select a bookmark: " -i -l 7 "$@") || exit 1
+  sel=$(echo $sel | cut -d ' ' -f 1)
+  if [ $sel = "edit" ]; then
+    edit
+    exit 1
+  fi
+  echo $sel | xsel -ib
+  notify-send "Bookmarks" "$sel copied to your clipboard"
+}
+
+edit() { \
+  st nvim $XDG_DATA_HOME/bookmarks
+}
+
+get

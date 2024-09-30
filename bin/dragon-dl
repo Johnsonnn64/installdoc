@@ -1,0 +1,20 @@
+#!/bin/sh
+
+url=$(dragon-drop -t -x)
+
+if [ ! -n "$url" ]; then
+  exit 1
+fi
+
+printf "File name: "
+read -r name
+
+if [ -e "$name" ]; then
+  printf "File already exists, overwrite? [y/n] "
+  read -r ans
+  if [ "$ans" != "y" ]; then
+    exit 1
+  fi
+fi
+
+wget --hsts-file="$XDG_CACHE_HOME"/wget-hsts -O $name "$url"
