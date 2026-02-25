@@ -1,0 +1,39 @@
+set ratios 1:2:3
+set icons
+set info size
+set scrolloff 5
+set previewer ~/.config/lf/preview
+set cleaner ~/.config/lf/cleaner
+set hiddenfiles ".git*"
+set number true
+set numberfmt "\033[30m"
+set relativenumber true
+
+cmd open ${{
+	case $(file --mime-type "$(readlink -f "$f")" -b) in
+		application/vnd.openxmlformats-officedocument.spreadsheetml.sheet) localc $fx ;;
+		image/vnd.djvu|application/pdf|application/octet-stream|application/postscript) zathura "$f";;
+		text/*|application/json|inode/x-empty) $EDITOR $fx;;
+		image/x-xcf) setsid -f gimp $f >/dev/null 2>&1 ;;
+		image/svg+xml) display -- $f ;;
+		image/*) nsxiv -a $fx ;;
+		audio/*) mpv $f ;;
+		video/*) mpv $f ;;
+		application/pdf|application/vnd*|application/epub*) setsid -f zathura $fx >/dev/null 2>&1 ;;
+		application/pgp-encrypted) $EDITOR $fx ;;
+        *) for f in $fx; do setsid -f $OPENER $f >/dev/null 2>&1; done;;
+	esac
+}}
+
+# unmapping defaults
+map d
+map n
+
+# my mappings
+map D delete
+map S $nsxiv $PWD/* -tar
+map nd push $mkdir<space>
+map nf push $touch<space>
+map dl %dragon-dl
+map dr %dragon-drop $fx
+map dd cut

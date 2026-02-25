@@ -139,7 +139,19 @@ sudo pacman -S dash
 sudo ln -sfT /bin/dash /bin/sh
 echo "[Trigger] \nType = Package \nOperation = Install \nOperation = Upgrade \nTarget = bash \n\n[Action] \nDescription = Re-pointing /bin/sh symlink to dash... \nWhen = PostTransaction \nExec = /usr/bin/ln -sfT dash /usr/bin/sh \nDepends = dash" | sudo tee /usr/share/libalpm/hooks/bash-update.hook
 
+## File Manager
+using lf for file manager
+- install lf
+```bash
+sudo pacman -S lf
+ln -vsf $PWD/lf/ $HOME/.config/
 ```
+- install lf img previewer
+```bash
+git clone https://github.com/thimc/lfimg
+make install
+```
+
 
 ## Audio
 using pipewire for audio
@@ -207,5 +219,4 @@ ln -vsf $PWD/bin/ $HOME/.local/
 [] git
 [] zathura
 [] nvim
-[] lf
 [] driver (screen tear)
