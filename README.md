@@ -174,6 +174,8 @@ ln -vsf $PWD/picom.conf $HOME/.config/picom/
 Using picom puts GPU on load especially with experimental backends and blur options, causing coil whine (scratching noise from GPU)
 Will update when fix is found
 
+There are no fixes. Picom draws 100+ watts from GPU with animations or fade on. Don't need animations anyways.
+
 ---
 
 ## Input Method Framework
