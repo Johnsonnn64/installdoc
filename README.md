@@ -211,12 +211,21 @@ some shell scripts
 ln -vsf $PWD/bin/ $HOME/.local/
 ```
 
+## PDF Reader
+using zathura
+- install zathura and zathura-pdf-poppler
+
+```sh
+sudo pacman -S zathura zathura-pdf-poppler
+ln -vsf $PWD/zathura $HOME/.config/
+```
+
+
 ## MISC
 [] nsxiv
 [] mpv
 [] btop
 [] catppuccin (grub, gtk, cursor, ytm, discord, etc)
 [] git
-[] zathura
 [] nvim
 [] driver (screen tear)
