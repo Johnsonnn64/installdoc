@@ -1,17 +1,16 @@
 #!/bin/sh
 
-# picom -b &
+picom -b &
 
 # for pipewire
 pipewire &
-pipewire-pulse &
+sleep 0.1
 wireplumber &
 # equalizer for pipewire
 easyeffects --gapplication-service &
 
 # for pulseaudio
 # pulseaudio --start --log-target=syslog &
-monitor -r &
 fcitx5 &
 clipmenud  &
 dunst &
@@ -19,6 +18,7 @@ unclutter --start-hidden --timeout 2 -f &
 xrdb merge ~/.config/x11/Xresources_catppuccin &
 # monitor -r &
 feh --bg-fill --no-fehbg ~/personal/pictures/wall.png &
+# ~/personal/screenlayout.sh &
 
 # run bar script and dwm ( do not remove this )
 ~/workspace/suckless/jondwm/bar/bar.sh &

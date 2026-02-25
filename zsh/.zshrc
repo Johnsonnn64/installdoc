@@ -18,14 +18,14 @@ setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording en
 setopt HIST_VERIFY               # Don't execute immediately upon history expansion.
 setopt AUTOCD
 setopt PROMPT_SUBST
-ZPLUGINS=/home/john/.config/zsh/zplugins
+ZPLUGINS="$HOME/.config/zsh/zplugins"
 
 # git status
 autoload -U colors && colors
 eval "$(starship init zsh)"
 #PS1="%B%{$fg[red]%}[%{$fg[yellow]%}%n%{$fg[green]%}@%{$fg[blue]%}%M %{$fg[magenta]%}%~%{$fg[red]%}]%{$reset_color%}%(!.#.$) "
 
-autoload -U compinit
+autoload -Uz compinit
 zstyle ':completion:*' menu select
 zmodload zsh/complist
 compinit
