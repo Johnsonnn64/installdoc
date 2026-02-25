@@ -138,6 +138,7 @@ sudo chsh -s /bin/zsh **users**
 sudo pacman -S dash
 sudo ln -sfT /bin/dash /bin/sh
 echo "[Trigger] \nType = Package \nOperation = Install \nOperation = Upgrade \nTarget = bash \n\n[Action] \nDescription = Re-pointing /bin/sh symlink to dash... \nWhen = PostTransaction \nExec = /usr/bin/ln -sfT dash /usr/bin/sh \nDepends = dash" | sudo tee /usr/share/libalpm/hooks/bash-update.hook
+```
 
 ## File Manager
 using lf for file manager
