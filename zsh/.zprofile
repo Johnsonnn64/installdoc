@@ -9,7 +9,7 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 export PATH="$PATH:$HOME/.local/bin"
 
-# clean up
+# clean up (https://wiki.archlinux.org/title/XDG_Base_Directory)
 export XINITRC="$XDG_CONFIG_HOME/x11/xinitrc"
 export GOPATH="$XDG_DATA_HOME/go"
 export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
@@ -18,8 +18,12 @@ export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
 export LESSHISTFILE=-
 export WINIT_X11_SCALE_FACTOR=1 # alacritty dpi scaling
 # export WGETRC="$XDG_CONFIG_HOME/wgetrc"
-# export npm_config_prefix="$HOME/.local/"
+export NPM_CONFIG_USERCONFIG=$XDG_CONFIG_HOME/npm/npmrc
 # export SSB_HOME="$XDG_DATA_HOME"/zoom
+export GTK2_RC_FILES="$XDG_CONFIG_HOME/gtk-2.0/gtkrc"
+export CARGO_HOME="$XDG_DATA_HOME"/cargo
+export NUGET_PACKAGES="$XDG_DATA_HOME/NuGetPackages"
+export PASSWORD_STORE_DIR="$XDG_DATA_HOME/pass"
 
 # etc
 export EDITOR="nvim"
