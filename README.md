@@ -184,6 +184,15 @@ sudo pacman -S keyd
 sudo ln -vsf default.conf /etc/keyd/
 ```
 
+## Notification
+using dunst as notification service
+- install dunst
+```bash
+sudo pacman -S dunst
+mkdir $HOME/.config/dunst
+ln -vsf $PWD/dunstrc $HOME/.config/dunst/
+```
+
 ## Scripts
 some shell scripts
 ```bash
