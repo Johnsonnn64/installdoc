@@ -24,6 +24,7 @@ export GTK2_RC_FILES="$XDG_CONFIG_HOME/gtk-2.0/gtkrc"
 export CARGO_HOME="$XDG_DATA_HOME"/cargo
 export NUGET_PACKAGES="$XDG_DATA_HOME/NuGetPackages"
 export PASSWORD_STORE_DIR="$XDG_DATA_HOME/pass"
+export CODEX_HOME="$XDG_DATA_HOME/codex"
 
 # etc
 export EDITOR="nvim"
