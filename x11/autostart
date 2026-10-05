@@ -3,9 +3,9 @@
 picom -b &
 
 # for pipewire
-pipewire &
-sleep 0.1
-wireplumber &
+# pipewire &
+# sleep 0.1
+# wireplumber &
 # equalizer for pipewire
 easyeffects --gapplication-service &
 
