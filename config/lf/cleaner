@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+if [ -n "${FIFO_UEBERZUG:-}" ] && [ -p "$FIFO_UEBERZUG" ]; then
+    printf '%s\n' '{"action":"remove","identifier":"PREVIEW"}' > "$FIFO_UEBERZUG"
+fi

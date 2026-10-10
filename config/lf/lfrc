@@ -1,0 +1,30 @@
+set ratios 1:2:3
+set icons
+set info size
+set scrolloff 5
+set previewer ~/.config/lf/preview
+set cleaner ~/.config/lf/cleaner
+set hiddenfiles ".git*"
+set number true
+set numberfmt "\033[30m"
+set relativenumber true
+
+cmd open ${{
+    mime=$(file --mime-type -Lb -- "$f")
+    case "$mime" in
+        text/*|application/json|inode/x-empty) "${EDITOR:-nvim}" "$f" ;;
+        application/pdf|application/postscript) zathura "$f" ;;
+        image/*) if command -v nsxiv >/dev/null; then nsxiv -a "$f"; else xdg-open "$f"; fi ;;
+        audio/*|video/*) if command -v mpv >/dev/null; then mpv "$f"; else xdg-open "$f"; fi ;;
+        *) xdg-open "$f" ;;
+    esac
+}}
+map d
+map n
+map D delete
+map S $nsxiv "$PWD" -tar
+map nd push $mkdir<space>
+map nf push $touch<space>
+map dl %dragon-dl
+map dr %dragon-drop $fx
+map dd cut

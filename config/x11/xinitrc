@@ -1,0 +1,28 @@
+#!/bin/sh
+set -eu
+export XDG_SESSION_TYPE=x11
+export XDG_CURRENT_DESKTOP=dwm
+export XDG_SESSION_DESKTOP=dwm
+export PATH="$HOME/.local/bin:$PATH"
+config=${XDG_CONFIG_HOME:-$HOME/.config}
+# shellcheck source=config/x11/input.sh
+if [ -r "$config/installdoc/input.sh" ]; then . "$config/installdoc/input.sh"; fi
+
+# Preserve Arch's resource, keymap, and session-bus integration.
+for resources in /etc/X11/xinit/.Xresources "$HOME/.Xresources" "$config/x11/Xresources_catppuccin"; do
+    if [ -r "$resources" ]; then xrdb -merge "$resources"; fi
+done
+for keymap in /etc/X11/xinit/.Xmodmap "$HOME/.Xmodmap"; do
+    if [ -r "$keymap" ]; then xmodmap "$keymap"; fi
+done
+for hook in /etc/X11/xinit/xinitrc.d/?*.sh; do
+    # Host-provided Arch xinit hooks are intentionally dynamic.
+    # shellcheck disable=SC1090
+    if [ -x "$hook" ]; then . "$hook"; fi
+done
+set -- DISPLAY XDG_SESSION_TYPE XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP
+if [ -n "${XAUTHORITY:-}" ]; then set -- "$@" XAUTHORITY; fi
+if [ -n "${GTK_IM_MODULE:-}" ]; then set -- "$@" GTK_IM_MODULE QT_IM_MODULE XMODIFIERS; fi
+systemctl --user import-environment "$@"
+dbus-update-activation-environment --systemd "$@"
+exec "$config/x11/autostart"

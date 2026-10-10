@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+file=${XDG_DATA_HOME:-$HOME/.local/share}/bookmarks
+mkdir -p "$(dirname -- "$file")"
+[ -e "$file" ] || touch "$file"
+choices=$(cat "$file")
+sel=$(printf '%s\nedit\n' "$choices" | dmenu -p 'Select a bookmark:' -i -l 7 "$@") || exit 0
+sel=${sel%% *}
+[ -n "$sel" ] || exit 0
+if [ "$sel" = edit ]; then exec alacritty -e nvim "$file"; fi
+printf '%s' "$sel" | xclip -selection clipboard
+notify-send Bookmarks "$sel copied to your clipboard"

@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+cache=${XDG_CACHE_HOME:-$HOME/.cache}/xrandr-args
+if [ "${1:-}" = -r ]; then
+    [ -f "$cache" ] || exit 0
+    xargs -0 xrandr < "$cache"
+else
+    xrandr "$@"
+    mkdir -p "$(dirname -- "$cache")"
+    printf '%s\0' "$@" > "$cache"
+fi

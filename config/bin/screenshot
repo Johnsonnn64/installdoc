@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+directory=$HOME/personal/pictures
+mkdir -p "$directory"
+xdotool mousemove_relative 1 1
+scrot -o -s -f "$directory/screenshot.png"
+xclip -selection clipboard -target image/png -i "$directory/screenshot.png"

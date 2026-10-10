@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+case $1 in
+    *.bmp|*.jpg|*.jpeg|*.png|*.webp|*.tiff|*.gif|*.jfif|*.ico|*.JPG|*.PNG)
+        if [ -n "${FIFO_UEBERZUG:-}" ] && [ -p "$FIFO_UEBERZUG" ]; then
+            # jq escapes quotes, backslashes, and newlines in filenames.
+            jq -cn --arg path "$1" --argjson x "$4" --argjson y "$5" \
+                --argjson width "$2" --argjson height "$3" \
+                '{action:"add",identifier:"PREVIEW",x:$x,y:$y,width:$width,height:$height,scaler:"contain",path:$path}' > "$FIFO_UEBERZUG"
+            exit 1
+        fi
+        exec chafa --size "${2}x${3}" "$1"
+        ;;
+    *)
+        mime=$(file --mime-type -Lb -- "$1")
+        case $mime in text/*|application/json) head -c 65536 -- "$1" ;; *) file -Lb -- "$1" ;; esac
+        ;;
+esac

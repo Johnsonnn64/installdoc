@@ -1,0 +1,96 @@
+diff --git a/lua/giga/plugins.lua b/lua/giga/plugins.lua
+--- a/lua/giga/plugins.lua
++++ b/lua/giga/plugins.lua
+@@ -241,4 +241,4 @@
+   --     })
+   --   end
+   -- }
+-})
++}, require("installdoc_shared").lazy_options())
+diff --git a/lua/giga/lsp/jdtls_setup.lua b/lua/giga/lsp/jdtls_setup.lua
+--- a/lua/giga/lsp/jdtls_setup.lua
++++ b/lua/giga/lsp/jdtls_setup.lua
+@@ -2,8 +2,8 @@
+ 
+ function M:setup()
+   local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+-  local workspace_dir = "/home/john/.cache/jdtls/workspace" .. project_name
+-  local equinox_launcher = vim.fn.glob("/home/john/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*", 1)
++  local workspace_dir = vim.fn.stdpath("cache") .. "/jdtls/workspace/" .. project_name
++  local equinox_launcher = vim.fn.glob(vim.fn.stdpath("data") .. "/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*", 1)
+   local config = {
+     -- The command that starts the language server
+     -- See: https://github.com/eclipse/eclipse.jdt.ls#running-from-the-command-line
+@@ -26,13 +26,13 @@
+ 
+       "-jar",
+       equinox_launcher,
+-      -- "/home/john/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_1.7.0.v20250519-0528.jar",
++      -- vim.fn.stdpath("data") .. "/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_1.7.0.v20250519-0528.jar",
+       -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                       ^^^^^^^^^^^^^^
+       -- Must point to the                                                     Change this to
+       -- eclipse.jdt.ls installation                                           the actual version
+ 
+       "-configuration",
+-      "/home/john/.local/share/nvim/mason/packages/jdtls/config_linux",
++      vim.fn.stdpath("data") .. "/mason/packages/jdtls/config_linux",
+       -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        ^^^^^^
+       -- Must point to the                      Change to one of `linux`, `win` or `mac`
+       -- eclipse.jdt.ls installation            Depending on your system.
+@@ -62,8 +62,8 @@
+     -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
+     init_options = {
+       bundles = {
+-        vim.fn.glob("/home/john/.local/share/nvim/mason/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar", 1),
+-        vim.fn.glob("/home/john/.local/share/nvim/mason/packages/java-test/extension/server/com.microsoft.java.test.plugin-*.jar", 1)
++        vim.fn.glob(vim.fn.stdpath("data") .. "/mason/packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar", 1),
++        vim.fn.glob(vim.fn.stdpath("data") .. "/mason/packages/java-test/extension/server/com.microsoft.java.test.plugin-*.jar", 1)
+       },
+     },
+   }
+diff --git a/lua/giga/autocmd.lua b/lua/giga/autocmd.lua
+--- a/lua/giga/autocmd.lua
++++ b/lua/giga/autocmd.lua
+@@ -7,7 +7,7 @@
+   group = AUNVIM
+ })
+ AC("BufRead", {
+-  pattern = "/home/john/personal/school/*",
++  pattern = vim.env.HOME .. "/personal/school/*",
+   command = "set filetype=markdown",
+   group = AUNVIM
+ })
+@@ -16,11 +16,14 @@
+   command = "setlocal concealcursor=nc",
+   group = AUNVIM
+ })
++-- Keep the normal-user website workflow out of root sessions.
++if vim.fn.getuid() ~= 0 then
+ AC("BufWritePost", {
+-  pattern = "/home/john/workspace/site/*",
++  pattern = vim.env.HOME .. "/workspace/site/*",
+   command = 'silent exec "!rsync -rtvzP ~/workspace/site/ root@johnsonnn.com:/var/www/site"',
+   group = AUNVIM
+ })
++end
+ AC("BufEnter", {
+   pattern = "*",
+   command = "set formatoptions-=cro",
+diff --git a/lua/installdoc_shared.lua b/lua/installdoc_shared.lua
+new file mode 100644
+--- /dev/null
++++ b/lua/installdoc_shared.lua
+@@ -0,0 +1,13 @@
++-- Config is shared, while plugin updates and runtime files belong to each account.
++local M = {}
++function M.lazy_options()
++  local state = vim.fn.stdpath("state")
++  local lock = state .. "/lazy-lock.json"
++  vim.fn.mkdir(state, "p")
++  local seed = vim.fn.stdpath("config") .. "/lazy-lock.json"
++  if vim.fn.filereadable(lock) == 0 and vim.fn.filereadable(seed) == 1 then
++    vim.fn.writefile(vim.fn.readfile(seed), lock)
++  end
++  return { lockfile = lock }
++end
++return M

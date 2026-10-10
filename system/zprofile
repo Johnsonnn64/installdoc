@@ -1,0 +1,2 @@
+# Arch login environment. zsh itself reads $ZDOTDIR/.zprofile afterwards.
+emulate sh -c 'source /etc/profile'

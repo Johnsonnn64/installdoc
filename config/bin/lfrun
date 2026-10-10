@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+if [ -z "${DISPLAY:-}" ] || [ -n "${SSH_CONNECTION:-}" ]; then exec lf "$@"; fi
+runtime=$(mktemp -d "${XDG_RUNTIME_DIR:-/tmp}/installdoc-lf.XXXXXXXX")
+export FIFO_UEBERZUG="$runtime/preview"
+mkfifo "$FIFO_UEBERZUG"
+pid=
+cleanup() {
+    exec 3>&-
+    if [ -n "$pid" ]; then kill "$pid" 2>/dev/null || :; wait "$pid" 2>/dev/null || :; fi
+    rm -f -- "$FIFO_UEBERZUG"
+    rmdir "$runtime"
+}
+trap cleanup 0
+trap 'exit 130' INT
+trap 'exit 143' TERM
+# Open read/write to avoid an open() deadlock if the renderer exits early.
+exec 3<>"$FIFO_UEBERZUG"
+ueberzugpp layer --silent --parser json <"$FIFO_UEBERZUG" 3>&- &
+pid=$!
+lf "$@" 3>&-

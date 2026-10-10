@@ -16,7 +16,7 @@ clipmenud  &
 dunst &
 unclutter --start-hidden --timeout 2 -f &
 xrdb merge ~/.config/x11/Xresources_catppuccin &
-# monitor -r &
+dualmon.sh
 feh --bg-fill --no-fehbg ~/personal/pictures/wall.png &
 # ~/personal/screenlayout.sh &
 

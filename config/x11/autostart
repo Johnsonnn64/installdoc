@@ -1,0 +1,47 @@
+#!/bin/sh
+set -eu
+config=${XDG_CONFIG_HOME:-$HOME/.config}
+state=${XDG_STATE_HOME:-$HOME/.local/state}/installdoc
+: "${XDG_RUNTIME_DIR:?A normal login session with XDG_RUNTIME_DIR is required}"
+lock=$XDG_RUNTIME_DIR/installdoc-x-session
+if ! mkdir "$lock"; then
+    printf 'Session lock exists: %s; check for a running session before removing it.\n' "$lock" >&2
+    exit 1
+fi
+pids=
+cleanup() {
+    trap '' INT TERM
+    for pid in $pids; do kill "$pid" 2>/dev/null || :; done
+    for pid in $pids; do wait "$pid" 2>/dev/null || :; done
+    rmdir "$lock"
+}
+trap cleanup 0
+trap 'exit 130' INT
+trap 'exit 143' TERM
+start() {
+    command -v "$1" >/dev/null 2>&1 || return 0
+    # Linux comm is limited to 15 bytes. Don't take ownership of an existing app.
+    if pgrep -u "$(id -u)" -x "$(printf '%.15s' "$1")" >/dev/null; then return 0; fi
+    "$@" &
+    pids="$pids $!"
+}
+xsetroot -solid black
+if [ -f "$HOME/personal/pictures/wall.png" ] && command -v feh >/dev/null; then
+    feh --bg-fill --no-fehbg "$HOME/personal/pictures/wall.png"
+fi
+# Optional host-specific display/touchpad commands belong in this local hook.
+if [ -x "$config/installdoc/display.sh" ]; then "$config/installdoc/display.sh"; fi
+start dunst
+start fcitx5
+start picom
+start clipmenud
+start lxqt-policykit-agent
+start unclutter --start-hidden --timeout 2
+if [ -f "$config/installdoc/easyeffects-enabled" ]; then start easyeffects --gapplication-service; fi
+if [ -x "$state/bar.sh" ]; then
+    "$state/bar.sh" &
+    pids="$pids $!"
+fi
+dwm &
+pids="$pids $!"
+wait "$!"
