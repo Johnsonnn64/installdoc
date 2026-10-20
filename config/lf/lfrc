@@ -8,6 +8,7 @@ set hiddenfiles ".git*"
 set number true
 set numberfmt "\033[30m"
 set relativenumber true
+set watch true
 
 cmd open ${{
     mime=$(file --mime-type -Lb -- "$f")

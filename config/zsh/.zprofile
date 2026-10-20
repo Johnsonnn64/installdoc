@@ -47,5 +47,5 @@ export SAVEHIST=99999
 
 # Normal-user interactive tty1 login only; never root or SSH.
 if [[ -o interactive && $EUID -ne 0 && -z ${DISPLAY:-} && -z ${SSH_CONNECTION:-} && -z ${SSH_TTY:-} && -r "$XINITRC" ]] && [[ "$(tty)" = /dev/tty1 ]] && command -v startx >/dev/null; then
-  exec startx "$XINITRC"
+  startx "$XINITRC"
 fi
