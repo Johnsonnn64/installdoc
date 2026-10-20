@@ -16,28 +16,88 @@ build_suckless() {
         fi
     fi
 }
+# Gaming selection and repository checks run during preflight, before mutations.
+gaming_add() {
+    for gaming_package do
+        case " $gaming_packages " in
+            *" $gaming_package "*) ;;
+            *) gaming_packages="${gaming_packages:+$gaming_packages }$gaming_package" ;;
+        esac
+    done
+}
+gaming_plan() {
+    [ -n "${GAMING_GPU:-}" ] || die 'Set GAMING_GPU to amd, intel, or nvidia (space-separated for hybrid GPUs).'
+    case $GAMING_GPU in *[!a-z\ ]*) die 'GAMING_GPU must contain space-separated GPU names.' ;; esac
+    case ${GAMING_EXTRAS:-} in *[!a-z\ ]*) die 'GAMING_EXTRAS must contain space-separated tool names.' ;; esac
+    gaming_packages=
+    gaming_nvidia=false
+    for gaming_gpu in $GAMING_GPU; do
+        case $gaming_gpu in
+            amd) gaming_add mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon ;;
+            intel) gaming_add mesa lib32-mesa vulkan-intel lib32-vulkan-intel ;;
+            nvidia)
+                gaming_nvidia=true
+                gaming_add nvidia-utils lib32-nvidia-utils
+                ;;
+            *) die "Unsupported GAMING_GPU: $gaming_gpu" ;;
+        esac
+    done
+    [ -n "$gaming_packages" ] || die 'GAMING_GPU must select at least one GPU.'
+    gaming_add vulkan-icd-loader lib32-vulkan-icd-loader lib32-libpulse steam
+    for gaming_extra in ${GAMING_EXTRAS:-}; do
+        case $gaming_extra in
+            gamemode) gaming_add gamemode lib32-gamemode ;;
+            mangohud) gaming_add mangohud lib32-mangohud ;;
+            *) die "Unsupported GAMING_EXTRAS tool: $gaming_extra (choose gamemode, mangohud)" ;;
+        esac
+    done
+}
+gaming_preflight() {
+    gaming_plan
+    gaming_ready=true
+    if ! command -v pacman-conf >/dev/null 2>&1; then
+        gaming_ready=false
+    else
+        gaming_repos=$(pacman-conf --repo-list) || die 'Cannot inspect pacman repositories.'
+        if ! printf '%s\n' "$gaming_repos" | grep -qx multilib; then gaming_ready=false; fi
+    fi
+    if ! "$gaming_ready"; then
+        gaming_message='Enable [multilib] and its Include line in /etc/pacman.conf, then manually run sudo pacman -Syu and rerun gaming/steam. The installer never refreshes databases or upgrades the system.'
+        if "$dry_run"; then printf 'NOTE: %s\n' "$gaming_message"; else die "$gaming_message"; fi
+    elif ! pacman -Si steam >/dev/null 2>&1; then
+        gaming_message='Multilib is enabled but Steam is absent from the local sync database. Manually run sudo pacman -Syu, then rerun gaming/steam.'
+        if "$dry_run"; then printf 'NOTE: %s\n' "$gaming_message"; else die "$gaming_message"; fi
+    fi
+    if "$gaming_nvidia"; then
+        if "$dry_run"; then
+            printf 'NOTE: nvidia requires an already configured, compatible NVIDIA kernel driver and nvidia-utils. Hybrid offload remains a host-specific setup.\n'
+        else
+            pacman -Q nvidia-utils >/dev/null 2>&1 || die 'Configure the NVIDIA kernel driver and nvidia-utils first; gaming only adds matching userspace libraries.'
+        fi
+    fi
+    if ! "$dry_run"; then
+        # All names come from the fixed package lists above.
+        # shellcheck disable=SC2086
+        pacman -Si $gaming_packages >/dev/null 2>&1 || die 'Selected gaming packages are unavailable in local sync databases. Review repositories and perform a manual full update.'
+    fi
+}
+gaming_install() {
+    # shellcheck disable=SC2086
+    packages $gaming_packages
+    printf '  Start Steam as your normal user; select Proton in Steam Compatibility settings as needed.\n'
+    printf '  Optional launch options: gamemoderun %%command%%; mangohud %%command%% (only for installed extras).\n'
+}
+
 apply_module() {
     case $1 in
         desktop|steam) : ;;
+        gaming) gaming_install ;;
         base)
             packages base-devel bc firefox man-db man-pages pacman-contrib playerctl powertop unzip words wget libnotify xdg-utils openssh
             run sudo systemctl enable --now paccache.timer
             printf '  fstrim.timer: enable manually after checking storage/discard support. Locale left unchanged.\n'
             ;;
         git) packages git lazygit ;;
-        network)
-            packages networkmanager
-            system_file "$ROOT/system/networkmanager.conf" /etc/NetworkManager/conf.d/20-installdoc.conf
-            if [ "$(readlink /etc/resolv.conf || :)" != /run/systemd/resolve/stub-resolv.conf ]; then
-                if [ -e /etc/resolv.conf ] || [ -L /etc/resolv.conf ]; then
-                    run sudo mkdir -p "/var/backups/installdoc/${BACKUP##*/}/etc"
-                    run sudo cp -a /etc/resolv.conf "/var/backups/installdoc/${BACKUP##*/}/etc/resolv.conf"
-                fi
-                run sudo ln -sfT /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-            fi
-            run sudo systemctl enable --now systemd-resolved NetworkManager
-            run sudo nmcli general reload conf
-            ;;
         xorg)
             packages xorg-server xorg-xinit xorg-xauth xorg-xrandr xorg-xset xorg-xsetroot xorg-xrdb xorg-xprop xorg-xinput xorg-xmodmap xf86-input-libinput xdotool xclip arandr scrot unclutter
             link "$ROOT/config/x11" "$CONFIG/x11"
@@ -92,7 +152,7 @@ apply_module() {
             ;;
         keyd)
             packages keyd
-            system_file "${KEYD_CONFIG:-/path/to/reviewed-keyd.conf}" /etc/keyd/default.conf
+            system_file "${KEYD_CONFIG}" /etc/keyd/default.conf
             run sudo systemctl enable keyd
             run sudo systemctl restart keyd
             ;;

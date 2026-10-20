@@ -55,8 +55,8 @@ according to its own configuration and were not upgraded/tested here.
 
 ## Inputs and migration gates
 
-- keyd: confirm which keyboard the existing Esc navigation / Right Alt mapping
-  applies to; set KEYD_CONFIG to the reviewed mapping. No inferred laptop mapping.
+- keyd: uses the repository's default.conf for now (Esc navigation / Right Alt
+  mapping); KEYD_CONFIG can override it. Hardware behavior remains untested.
 - Existing-machine zsh: the known global hardcoded ZDOTDIR and duplicate profile
   sourcing now have an automatic backed-up migration. Unknown custom forms still
   need review; preflight checks these even during dry-run.
@@ -65,14 +65,15 @@ according to its own configuration and were not upgraded/tested here.
   to the running machine. Actual privileged deployment and fresh root login remain
   VM acceptance checks, not completed live tests.
 - EasyEffects: provide presets, autoload choice/rules, referenced external assets.
-- Gaming: provide GPU(s)/hybrid topology and selected extras. No gaming or multilib
-  mutations are implemented yet.
-- Network: resolve any competing active/enabled managers and inspect custom
-  NetworkManager overrides from a local recovery-capable session.
+- Gaming: select GAMING_GPU and optional GAMING_EXTRAS. Enable multilib and
+  perform a manual full update before installation. Package transactions and
+  actual Steam/game behavior still require machine testing.
+- Network: now configured manually using the README instructions; the installer
+  no longer manages network services, NetworkManager config, or /etc/resolv.conf.
 
 The initial optional-module gates deliberately fail even for their dry-run when
-required inputs are missing; the desktop dry-run shows a keyd placeholder and
-prints the required KEYD_CONFIG input. Full deployment still requires that input.
+required inputs are missing. The desktop dry-run uses the repository's default.conf
+for keyd unless KEYD_CONFIG supplies another mapping.
 
 ## Desktop migration follow-up
 
@@ -97,3 +98,23 @@ Additional passing tests:
 
 These fixtures do not replace a privileged VM migration, real root shell startup,
 or full Neovim/plugin startup. The initial full-desktop validation gaps above remain.
+
+## Steam/gaming implementation — 2026-10-11
+
+The local PCI inventory identifies an AMD Radeon Navi 23 GPU. Multilib is
+currently disabled. No packages, repositories, services, or system configs were
+changed while implementing gaming.
+
+- `sh tests/gaming.sh`: offline package selection for AMD, Intel/AMD hybrid, and
+  NVIDIA; native/32-bit packages; selected extras; package deduplication; invalid
+  selection rejection; NVIDIA prerequisite; disabled multilib, missing database,
+  and unavailable package rejection; dry-run prerequisite notes; Steam dependency.
+- `sh tests/bootstrap.sh`: installer regression checks, including rejection of
+  missing gaming hardware selection before any requested module runs.
+- `GAMING_GPU=amd ./install.sh --dry-run steam gaming`: one gaming transaction,
+  AMD native/32-bit providers, and a manual multilib/full-update prerequisite note.
+- Dash syntax checks and whitespace checks for changed installer/docs/tests.
+
+Actual multilib package resolution/installation, Steam startup, Proton games,
+optional overlays, NVIDIA driver compatibility, and hybrid offload remain
+machine acceptance checks. NVIDIA kernel drivers are configured separately.

@@ -88,14 +88,14 @@ aur() {
 }
 validate_module() {
     case $1 in
-        desktop|base|git|network|xorg|dwm|dmenu|alacritty|zsh|root-config|dash|pipewire|fcitx|keyd|dunst|picom|feh|clipmenu|cli|lf|neovim|fonts|polkit|bluetooth|easyeffects|media|gaming|steam) ;;
+        desktop|base|git|xorg|dwm|dmenu|alacritty|zsh|root-config|dash|pipewire|fcitx|keyd|dunst|picom|feh|clipmenu|cli|lf|neovim|fonts|polkit|bluetooth|easyeffects|media|gaming|steam) ;;
         *) die "Unknown module: $1 (see --help)" ;;
     esac
 }
 resolve() {
     case " $ordered " in *" $1 "*) return ;; esac
     case $1 in
-        desktop) for dependency in base git network xorg dmenu dwm alacritty zsh dash pipewire fcitx keyd dunst picom feh clipmenu cli neovim root-config fonts polkit; do resolve "$dependency"; done ;;
+        desktop) for dependency in base git xorg dmenu dwm alacritty zsh dash pipewire fcitx keyd dunst picom feh clipmenu cli neovim root-config fonts polkit; do resolve "$dependency"; done ;;
         root-config) resolve zsh; resolve neovim ;;
         dwm) resolve xorg; resolve dmenu ;;
         clipmenu|bluetooth) resolve dmenu ;;
@@ -107,10 +107,9 @@ resolve() {
 }
 has_module() { case " $ordered " in *" $1 "*) return 0 ;; *) return 1 ;; esac; }
 preflight() {
-    if has_module gaming; then die 'Gaming needs explicit GPU/tool choices; no packages or multilib changes made.'; fi
+    if has_module gaming; then gaming_preflight; fi
     if has_module keyd && [ -z "${KEYD_CONFIG:-}" ]; then
-        if "$dry_run"; then printf 'NOTE: real keyd/desktop install requires KEYD_CONFIG=/absolute/path/to/reviewed.conf\n';
-        else die 'Set KEYD_CONFIG to the reviewed mapping for this keyboard before running desktop/keyd.'; fi
+        KEYD_CONFIG=$ROOT/default.conf
     fi
     if [ -n "${KEYD_CONFIG:-}" ]; then
         case $KEYD_CONFIG in /*) ;; *) die 'KEYD_CONFIG must be an absolute path' ;; esac
@@ -127,16 +126,6 @@ preflight() {
     [ -f /etc/arch-release ] || die 'This installer targets Arch Linux.'
     command -v sudo >/dev/null || die 'sudo is required.'
     command -v pacman >/dev/null || die 'pacman is required.'
-    if has_module network; then
-        active_units=$(systemctl list-units --state=active --no-legend 'dhcpcd@*' 'netctl*' 'wpa_supplicant@*') || die 'Cannot inspect active network services.'
-        enabled_units=$(systemctl list-unit-files --state=enabled --no-legend 'dhcpcd@*' 'netctl*' 'wpa_supplicant@*') || die 'Cannot inspect enabled network services.'
-        [ -z "$active_units$enabled_units" ] || die 'An interface-specific network service is active or enabled; migrate it first.'
-        for service in iwd connman dhcpcd systemd-networkd dnsmasq; do
-            if systemctl is-active --quiet "$service.service" || systemctl is-enabled --quiet "$service.service" 2>/dev/null; then
-                die "Competing network/DNS service: $service. Migrate from a local TTY first; installer will not stop it."
-            fi
-        done
-    fi
     if has_module pipewire; then
         systemctl --user show-environment >/dev/null || die 'A working systemd user session is required for audio.'
     fi
@@ -145,11 +134,13 @@ help() {
     cat <<'EOF'
 Usage: ./install.sh [--dry-run] MODULE [MODULE ...]
 
-desktop: base git network xorg dmenu dwm alacritty zsh dash pipewire fcitx
+desktop: base git xorg dmenu dwm alacritty zsh dash pipewire fcitx
          keyd dunst picom feh clipmenu cli neovim root-config fonts polkit
 Standalone modules: every name above, plus lf.
-Optional: bluetooth, media, easyeffects (requires exported presets).
-Deferred: gaming / steam (requires GPU and tool choices).
+Optional: bluetooth, media, easyeffects (requires exported presets), gaming/steam.
+Gaming: GAMING_GPU='amd intel nvidia' (select actual GPUs, space-separated).
+        GAMING_EXTRAS='gamemode mangohud' (optional; empty by default).
+        Requires enabled multilib and a manual full update before installation.
 Dependencies: dwm -> xorg dmenu; clipmenu/bluetooth -> dmenu;
               cli -> lf; easyeffects -> pipewire; root-config -> zsh neovim.
               Shared modules run once.
@@ -158,8 +149,11 @@ Examples:
   ./install.sh --dry-run desktop
   ./install.sh pipewire fcitx media
   ./install.sh --dry-run root-config
+  ./install.sh keyd
+  GAMING_GPU=amd ./install.sh --dry-run steam
   KEYD_CONFIG=/path/to/reviewed.conf ./install.sh desktop
 
+keyd uses the repository's default.conf unless KEYD_CONFIG is supplied.
 Run as a normal Arch user with sudo. Never upgrades/refreshes package databases.
 Existing repositories are never pulled/reset; legacy checkouts are copied.
 Backups: ~/.local/state/installdoc/backups and /var/backups/installdoc.

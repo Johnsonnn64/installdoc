@@ -13,6 +13,8 @@ fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 grep -q 'pipewire fcitx media' "$test_dir/help" || fail help
 if "$ROOT/install.sh" base invalid-module > "$test_dir/invalid" 2>&1; then fail 'unknown module accepted'; fi
 if grep -q '^\[base\]' "$test_dir/invalid"; then fail 'base ran before validation'; fi
+if "$ROOT/install.sh" --dry-run base network > "$test_dir/network" 2>&1; then fail 'removed network module accepted'; fi
+if grep -q '^\[base\]' "$test_dir/network"; then fail 'base ran before removed-module validation'; fi
 "$ROOT/install.sh" --dry-run pipewire pipewire media > "$test_dir/dry"
 [ "$(grep -c '^\[pipewire\]' "$test_dir/dry")" = 1 ] || fail deduplication
 if grep -Eq '<(-Syu|-Sy)>' "$test_dir/dry"; then fail 'database refresh'; fi
@@ -57,6 +59,7 @@ if grep -q '^\[base\]' "$test_dir/gaming"; then fail 'base ran before missing-in
     [ "$(cat "$test_dir/repo/local")" = uncommitted ] || fail 'dirty checkout changed'
     resolve desktop
     resolve pipewire
+    case " $ordered " in *' network '*) fail 'removed network module in desktop' ;; esac
     case " $ordered " in *' bluetooth '*|*' easyeffects '*|*' media '*|*' gaming '*) fail 'optional module in desktop' ;; esac
 )
 
